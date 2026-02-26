@@ -1,0 +1,258 @@
+﻿<!DOCTYPE html>
+<html lang="it" class="dark:bg-slate-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-API Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200">
+    <!-- Navbar -->
+    <nav class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10 transition-colors duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="renderHome()">
+                <div class="w-8 h-8 bg-blue-600 text-white rounded flex items-center justify-center font-bold text-xl">A</div>
+                <span class="font-bold text-xl tracking-tight">API Hub</span>
+            </div>
+            <button onclick="renderHome()" class="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Torna alla Home</button>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8">
+        
+        <!-- HOME VIEW -->
+        <div id="home-view">
+            <header class="mb-12 text-center max-w-2xl mx-auto">
+                <h1 class="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4">Esplora API</h1>
+                <p class="text-lg text-slate-600 dark:text-slate-400">Una collezione di API gratuite, veloci e pronte all'uso per i tuoi progetti. Clicca su una card per leggere la documentazione e testarla in tempo reale.</p>
+            </header>
+
+            <div id="api-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Cards injected via JS -->
+            </div>
+        </div>
+
+        <!-- API DETAIL VIEW -->
+        <div id="api-view" class="hidden">
+            <div class="mb-8">
+                <button onclick="renderHome()" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium flex items-center gap-1 mb-4 transition-colors">
+                    &larr; Torna alle API
+                </button>
+                <h1 id="api-title" class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2">Titolo API</h1>
+                <p id="api-desc" class="text-lg text-slate-600 dark:text-slate-400">Descrizione API</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Endpoints List -->
+                <div class="space-y-4" id="endpoints-list">
+                    <!-- Endpoints injected via JS -->
+                </div>
+
+                <!-- Interactive Tester -->
+                <div class="bg-slate-900 dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden flex flex-col h-[600px] sticky top-24 border border-transparent dark:border-slate-800">
+                    <div class="p-6 border-b border-slate-800">
+                        <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Test API Interattivo
+                        </h2>
+                        <form id="api-form" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Seleziona Endpoint</label>
+                                <select id="endpoint-select" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                </select>
+                            </div>
+                            <div id="param-container" style="display: none;">
+                                <label id="param-label" class="block text-sm font-medium text-slate-400 mb-1">Parametro</label>
+                                <input type="text" id="param-input" class="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors flex justify-center items-center gap-2">
+                                <span>Invia Richiesta</span>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="flex-grow bg-[#1d1f21] relative flex flex-col min-h-0">
+                        <div class="px-4 py-2 bg-slate-800/80 border-b border-slate-700/50 flex justify-between items-center shrink-0">
+                            <span class="text-xs font-mono text-slate-400" id="request-url">In attesa di richiesta...</span>
+                            <span class="text-xs font-mono px-2 py-1 rounded hidden" id="response-status"></span>
+                        </div>
+                        <div class="flex-grow overflow-auto p-4">
+                            <pre class="m-0 text-sm h-full"><code id="response-body" class="language-json">// Il risultato apparirà qui...</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const apis = [
+            {
+                id: 'catastale',
+                name: 'Codice Catastale',
+                iconSvg: '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>',
+                colorClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border-blue-200 dark:border-blue-800',
+                description: 'Trova comuni e codici catastali italiani.',
+                endpoints: [
+                    { path: '/comune', method: 'GET', desc: 'Ritorna tutti i comuni e i relativi codici catastali.' },
+                    { path: '/codiceCatastale', method: 'GET', desc: 'Ritorna tutti i codici catastali e i relativi comuni.' },
+                    { path: '/comune/{nome}', method: 'GET', desc: 'Cerca il codice catastale dato il nome del comune.', param: 'nome', placeholder: 'Roma' },
+                    { path: '/codiceCatastale/{codice}', method: 'GET', desc: 'Cerca il comune dato il codice catastale.', param: 'codice', placeholder: 'H501' }
+                ]
+            },
+            {
+                id: 'uuid',
+                name: 'UUID Generator',
+                iconSvg: '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>',
+                colorClass: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 border-purple-200 dark:border-purple-800',
+                description: 'Genera identificatori univoci universali (UUID v4).',
+                endpoints: [
+                    { path: '/api/uuid', method: 'GET', desc: 'Genera un singolo UUID v4 casuale.' },
+                    { path: '/api/uuid?count={count}', method: 'GET', desc: 'Genera multipli UUID in una sola richiesta (max 100).', param: 'count', placeholder: '5' }
+                ]
+            },
+            {
+                id: 'password',
+                name: 'Password Generator',
+                iconSvg: '<svg class="w-7 h-7" viewBox="0 0 24 24" fill="none"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12 14.5V16.5M7 10.0288C7.47142 10 8.05259 10 8.8 10H15.2C15.9474 10 16.5286 10 17 10.0288M7 10.0288C6.41168 10.0647 5.99429 10.1455 5.63803 10.327C5.07354 10.6146 4.6146 11.0735 4.32698 11.638C4 12.2798 4 13.1198 4 14.8V16.2C4 17.8802 4 18.7202 4.32698 19.362C4.6146 19.9265 5.07354 20.3854 5.63803 20.673C6.27976 21 7.11984 21 8.8 21H15.2C16.8802 21 17.7202 21 18.362 20.673C18.9265 20.3854 19.3854 19.9265 19.673 19.362C20 18.7202 20 17.8802 20 16.2V14.8C20 13.1198 20 12.2798 19.673 11.638C19.3854 11.0735 18.9265 10.6146 18.362 10.327C18.0057 10.1455 17.5883 10.0647 17 10.0288M7 10.0288V8C7 5.23858 9.23858 3 12 3C14.7614 3 17 5.23858 17 8V10.0288" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>',
+                colorClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+                description: 'Genera password sicure e casuali.',
+                endpoints: [
+                    { path: '/api/password', method: 'GET', desc: 'Genera una password sicura di 12 caratteri.' },
+                    { path: '/api/password?length={length}', method: 'GET', desc: 'Genera una password con lunghezza personalizzata (max 128).', param: 'length', placeholder: '16' }
+                ]
+            },
+            {
+                id: 'text',
+                name: 'Text Analyzer',
+                iconSvg: '<svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>',
+                colorClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+                description: 'Analizza stringhe di testo per contare parole, caratteri e palindromi.',
+                endpoints: [
+                    { path: '/api/text?text={text}', method: 'GET', desc: 'Analizza il testo fornito.', param: 'text', placeholder: 'Anna lava la panna' }
+                ]
+            },
+            {
+                id: 'dadi',
+                name: 'Lancio Dadi',
+                iconSvg: '<svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M5 6C5 5.44772 5.44772 5 6 5H18C18.5523 5 19 5.44772 19 6V18C19 18.5523 18.5523 19 18 19H6C5.44772 19 5 18.5523 5 18V6ZM6 3C4.34315 3 3 4.34315 3 6V18C3 19.6569 4.34315 21 6 21H18C19.6569 21 21 19.6569 21 18V6C21 4.34315 19.6569 3 18 3H6ZM10 8.5C10 9.32843 9.32843 10 8.5 10C7.67157 10 7 9.32843 7 8.5C7 7.67157 7.67157 7 8.5 7C9.32843 7 10 7.67157 10 8.5ZM13.5 12.0001C13.5 12.8285 12.8284 13.5001 12 13.5001C11.1716 13.5001 10.5 12.8285 10.5 12.0001C10.5 11.1716 11.1716 10.5001 12 10.5001C12.8284 10.5001 13.5 11.1716 13.5 12.0001ZM15.5 10C16.3284 10 17 9.32843 17 8.5C17 7.67157 16.3284 7 15.5 7C14.6716 7 14 7.67157 14 8.5C14 9.32843 14.6716 10 15.5 10ZM17 15.5C17 16.3284 16.3284 17 15.5 17C14.6716 17 14 16.3284 14 15.5C14 14.6716 14.6716 14 15.5 14C16.3284 14 17 14.6716 17 15.5ZM8.5 17C9.32843 17 10 16.3284 10 15.5C10 14.6716 9.32843 14 8.5 14C7.67157 14 7 14.6716 7 15.5C7 16.3284 7.67157 17 8.5 17Z" fill="currentColor"></path> </g></svg>',
+                colorClass: 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400 border-rose-200 dark:border-rose-800',
+                description: 'Simula il lancio di dadi a N facce.',
+                endpoints: [
+                    { path: '/api/dice', method: 'GET', desc: 'Lancia un classico dado a 6 facce.' },
+                    { path: '/api/dice?faces={faces}', method: 'GET', desc: 'Lancia un dado con un numero specifico di facce (es. 20).', param: 'faces', placeholder: '20' }
+                ]
+            }
+        ];
+
+        function renderHome() {
+            document.getElementById('home-view').classList.remove('hidden');
+            document.getElementById('api-view').classList.add('hidden');
+            
+            const grid = document.getElementById('api-grid');
+            grid.innerHTML = apis.map(api => `
+                <div onclick="openApi('${api.id}')" class="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 hover:shadow-xl hover:-translate-y-1 hover:border-blue-300 dark:hover:border-blue-700 transition-all cursor-pointer group flex flex-col h-full">
+                    <div class="w-14 h-14 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform shadow-sm border ${api.colorClass}">
+                        ${api.iconSvg}
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">${api.name}</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm flex-grow">${api.description}</p>
+                    <div class="mt-6 text-blue-600 dark:text-blue-400 text-sm font-semibold flex items-center gap-1 group-hover:gap-2 transition-all">
+                        Esplora API <span aria-hidden="true">&rarr;</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openApi(id) {
+            const api = apis.find(a => a.id === id);
+            document.getElementById('home-view').classList.add('hidden');
+            document.getElementById('api-view').classList.remove('hidden');
+            
+            document.getElementById('api-title').textContent = api.name;
+            document.getElementById('api-desc').textContent = api.description;
+            
+            document.getElementById('endpoints-list').innerHTML = api.endpoints.map(ep => `
+                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 font-mono text-sm px-2 py-1 rounded font-bold">${ep.method}</span>
+                        <code class="text-slate-800 dark:text-slate-200 font-semibold break-all">${ep.path}</code>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">${ep.desc}</p>
+                </div>
+            `).join('');
+
+            const select = document.getElementById('endpoint-select');
+            select.innerHTML = api.endpoints.map((ep, i) => `<option value="${i}">${ep.path}</option>`).join('');
+            
+            document.getElementById('response-body').textContent = '// Il risultato apparirà qui...';
+            document.getElementById('response-status').classList.add('hidden');
+            document.getElementById('request-url').textContent = 'In attesa di richiesta...';
+            
+            select.onchange = () => {
+                const ep = api.endpoints[select.value];
+                const paramContainer = document.getElementById('param-container');
+                if (ep.param) {
+                    paramContainer.style.display = 'block';
+                    document.getElementById('param-label').textContent = ep.param;
+                    document.getElementById('param-input').placeholder = ep.placeholder || '';
+                    document.getElementById('param-input').value = ep.placeholder || '';
+                } else {
+                    paramContainer.style.display = 'none';
+                }
+            };
+            select.onchange();
+
+            const form = document.getElementById('api-form');
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const ep = api.endpoints[select.value];
+                let url = ep.path;
+                
+                if (ep.param) {
+                    const val = encodeURIComponent(document.getElementById('param-input').value.trim());
+                    url = url.replace('{'+ep.param+'}', val);
+                }
+
+                document.getElementById('request-url').textContent = `GET ${url}`;
+                const responseBody = document.getElementById('response-body');
+                const responseStatus = document.getElementById('response-status');
+                
+                responseBody.textContent = 'Caricamento in corso...';
+                responseBody.className = 'language-json';
+                responseStatus.classList.add('hidden');
+                Prism.highlightElement(responseBody);
+
+                try {
+                    const start = performance.now();
+                    const res = await fetch(url);
+                    const time = Math.round(performance.now() - start);
+                    
+                    responseStatus.textContent = `${res.status} ${res.statusText} - ${time}ms`;
+                    responseStatus.className = `text-xs font-mono px-2 py-1 rounded ${res.ok ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'}`;
+                    responseStatus.classList.remove('hidden');
+
+                    const data = await res.json();
+                    responseBody.textContent = JSON.stringify(data, null, 2);
+                } catch (err) {
+                    responseBody.textContent = `Errore di rete: ${err.message}`;
+                    responseStatus.textContent = 'Error';
+                    responseStatus.className = 'text-xs font-mono px-2 py-1 rounded bg-red-900/50 text-red-400';
+                    responseStatus.classList.remove('hidden');
+                }
+                Prism.highlightElement(responseBody);
+            };
+        }
+
+        // Inizializza la home
+        renderHome();
+    </script>
+</body>
+</html>

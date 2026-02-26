@@ -5,5 +5,5 @@ compatibility_flags = ["python_workers"]
 
 [[rules]]
 type = "Text"
-globs = ["**/*.csv"]
+globs = ["**/*.csv", "**/*.html"]
 fallthrough = true
