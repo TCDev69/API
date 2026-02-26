@@ -1,4 +1,9 @@
-name = "codice-catastale"
-main = "worker.py"
+name = "api"
+main = "main.py"
 compatibility_date = "2026-02-26"
 compatibility_flags = ["python_workers"]
+
+[[rules]]
+type = "Text"
+globs = ["**/*.csv"]
+fallthrough = true
